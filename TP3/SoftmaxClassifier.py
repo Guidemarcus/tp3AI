@@ -83,7 +83,8 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
             self.probabilities = self._softmax(logits)
 
             loss = self._cost_function(self.probabilities, y)
-            # self.theta_ =
+            # Updates weights
+            self.theta_ = self.theta - self.lr * self._get_gradient(X, y, self.probabilities)
 
             # self.losses_.append(loss)
 
