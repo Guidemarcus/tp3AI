@@ -79,17 +79,17 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
 
         for epoch in range(self.n_epochs):
 
-            logits = X_bias * self.theta
+            logits = np.dot(X_bias, self.theta)
             self.probabilities = self._softmax(logits)
 
             loss = self._cost_function(self.probabilities, y)
             # Updates weights
-            self.theta_ = self.theta - self.lr * self._get_gradient(X, y, self.probabilities)
+            self.theta_ = self.theta - self.lr * self._get_gradient(X_bias, y, self.probabilities)
 
             self.losses_.append(loss)
 
             if self.early_stopping:
-                if len(self.losses_)> 1 and self.threshold < abs(loss - self.losses[-2]):
+                if len(self.losses_) > 1 and self.threshold < abs(loss - self.losses_[-2]):
                     return self
 
         return self
@@ -136,8 +136,7 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         except AttributeError:
             raise RuntimeError("You must train classifer before predicting data!")
         self.fit(X, y)
-
-        return self.probabilities * y
+        return np.dot(y, self.probabilities)
 
     def fit_predict(self, X, y=None):
         self.fit(X, y)
@@ -181,7 +180,7 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         Ensure that probabilities are not equal to either 0. or 1. using self.eps
 
         Out:
-        Probabilities
+        log_loss
     """
 
     def _cost_function(self, probabilities, y):
@@ -203,6 +202,7 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         # Replaces 1 probabilities by 1 - eps
         np.place(probabilities, probabilities == 1, 1 - self.eps)
 
+        return log_loss
 
 
     """
@@ -236,7 +236,9 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
             np.place(np_y, np_y == categories[index], index)
 
         # Sets ones to the concerned values without using loop directly
-            yohe[np.arange(m), np_y] = 1
+        # print(np.arange(m))
+        # print(np_y)
+        yohe[np.arange(m), np_y] = 1
 
         return yohe
 
@@ -251,7 +253,7 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         Probabilities
     """
 
-    def _softmax(z):
+    def _softmax(self, z):
         return np.apply_along_axis(lambda x: np.exp(x) / (np.sum(np.exp(z), axis=1)), 0, z)
 
 
@@ -276,7 +278,7 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         # One hot encoding of y
         yohe = self._one_hot(y)
         # Computes costs function gradient
-        gradient = np.transpose(X) * (probas - yohe) / X.shape[0]
+        gradient = np.dot(np.transpose(X), (probas - yohe)) / X.shape[0]
 
         if self.regularization:
             theta2 = np.delete(self.theta, 0, 0)
