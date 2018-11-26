@@ -21,4 +21,5 @@ def _one_hot(X):
 
     return one_hot_array
 
-print(_one_hot([1,4,2,5,4]))
+print(np.exp([[1,2, 3],[1,2, 3],[1,2, 3]]))
+print(np.sum(np.exp([[1,2, 3],[1,2, 3],[1,2, 3]]), axis=1))

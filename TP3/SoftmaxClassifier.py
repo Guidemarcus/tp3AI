@@ -75,12 +75,12 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         # Sets the values so the first colums has ones and the others correspond to X
         X_bias[:, 1:] = np_x
 
-        self.theta_ = np.random.rand(self.nb_feature + 1, self.nb_classes)
+        self.theta = np.random.rand(self.nb_feature + 1, self.nb_classes)
 
         for epoch in range(self.n_epochs):
 
-            # logits =
-            # probabilities =
+            logits = X_bias * self.theta
+            probabilities = self._softmax(logits)
 
             # loss =
             # self.theta_ =
@@ -110,8 +110,9 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
             getattr(self, "theta_")
         except AttributeError:
             raise RuntimeError("You must train classifer before predicting data!")
+        self.fit(X, y)
 
-        pass
+
 
         """
         In: 
@@ -132,7 +133,7 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
             getattr(self, "theta_")
         except AttributeError:
             raise RuntimeError("You must train classifer before predicting data!")
-        pass
+        self.fit(X, y)
 
     def fit_predict(self, X, y=None):
         self.fit(X, y)
@@ -202,16 +203,16 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         categories = np.unique(np_y)
         # Creates a zero matrix whose number of columns corresponds to the number of categories
         # and the number of rows corresponds to the numbers of training examples
-        one_hot_array = np.zeros((m, categories.size))
+        yohe = np.zeros((m, categories.size))
         # Formats array by replacing categories number by their index in categories array in order
         # not to exceed one_hot_array size during the next step
         for index in range(len(categories)):
             np.place(np_y, np_y == categories[index], index)
 
         # Sets ones to the concerned values without using loop directly
-        one_hot_array[np.arange(m), np_y] = 1
+            yohe[np.arange(m), np_y] = 1
 
-        return one_hot_array
+        return yohe
 
     """
         In :
@@ -225,8 +226,7 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
     """
 
     def _softmax(z):
-        proba = np.apply_along_axis(lambda x: np.exp(x) / (sum(np.exp(z))), 0, z)
-        return proba
+        return np.apply_along_axis(lambda x: np.exp(x) / (np.sum(np.exp(z), axis=1)), 0, z)
 
 
 
