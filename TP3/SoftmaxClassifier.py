@@ -190,13 +190,14 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         log_loss = (-1 / self.probabilities.shape[0])*(np.sum(np.sum(yohe * np.log(probabilities), axis=1), axis=0))
 
         if self.regularization:
-            pass
+            theta2 = np.delete(self.theta, 0, 0)
+            log_loss = log_loss + self.alpha * np.sum(np.sum(np.power(theta2, 2), axis=1), axis=0)
 
-        # # Replaces 0 probabilities by eps
-        # np.place(probabilities, probabilities == 0, self.eps)
-        # # Replaces 1 probabilities by 1 - eps
-        # np.place(probabilities, probabilities == 1, 1 - self.eps)
-        #
+        # Replaces 0 probabilities by eps
+        np.place(probabilities, probabilities == 0, self.eps)
+        # Replaces 1 probabilities by 1 - eps
+        np.place(probabilities, probabilities == 1, 1 - self.eps)
+
 
 
     """
@@ -273,6 +274,8 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         gradient = np.transpose(X) * (probas - yohe) / X.shape[0]
 
         if self.regularization:
-            pass
+            theta2 = np.delete(self.theta, 0, 0)
+            # TODO Vérifier s'il faut ajouter le terme au gradient ou non
+            gradient = gradient + self.alpha * np.sum(np.sum(np.power(theta2, 2), axis=1), axis=0)
 
         return gradient

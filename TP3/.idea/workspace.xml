@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="86830c13-36b4-4079-849b-aeb7d67c4987" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SoftmaxClassifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/SoftmaxClassifier.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_processing_tutorial.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing_tutorial.ipynb" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -38,12 +40,12 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="834" />
+          <entry key="py" value="1094" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="834" />
+          <entry key="Python" value="1094" />
         </counts>
       </usages-collector>
     </session>
@@ -65,11 +67,11 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/SoftmaxClassifier.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="295">
-              <caret line="276" column="23" selection-start-line="276" selection-start-column="23" selection-end-line="276" selection-end-column="23" />
+            <state relative-caret-position="244">
+              <caret line="277" column="73" selection-start-line="277" selection-start-column="73" selection-end-line="277" selection-end-column="73" />
               <folding>
                 <element signature="e#0#55#0" expanded="true" />
-                <marker date="1543252589890" expanded="true" signature="4970:5628" ph="..." />
+                <marker date="1543254474424" expanded="true" signature="5066:5838" ph="..." />
               </folding>
             </state>
           </provider>
@@ -128,7 +130,7 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds">
+  <component name="ProjectFrameBounds" extendedState="1">
     <option name="x" value="907" />
     <option name="width" value="1020" />
     <option name="height" value="1038" />
@@ -260,11 +262,12 @@
       <window_info anchor="bottom" id="Event Log" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.2969871" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.2969871" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="right" x="0" y="0" width="154" height="630" id="Documentation" side_tool="true" weight="0.32936507" />
       <window_info anchor="right" id="SciView" />
       <window_info anchor="right" id="Database" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -306,11 +309,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/SoftmaxClassifier.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="295">
-          <caret line="276" column="23" selection-start-line="276" selection-start-column="23" selection-end-line="276" selection-end-column="23" />
+        <state relative-caret-position="244">
+          <caret line="277" column="73" selection-start-line="277" selection-start-column="73" selection-end-line="277" selection-end-column="73" />
           <folding>
             <element signature="e#0#55#0" expanded="true" />
-            <marker date="1543252589890" expanded="true" signature="4970:5628" ph="..." />
+            <marker date="1543254474424" expanded="true" signature="5066:5838" ph="..." />
           </folding>
         </state>
       </provider>
