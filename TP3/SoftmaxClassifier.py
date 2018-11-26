@@ -186,7 +186,7 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         # Replaces 1 probabilities by 1 - eps
         np.place(probabilities, probabilities == 1, 1 - self.eps)
 
-        log_loss = (-1 / self.probabilities.shape[0])*(np.sum(np.sum(y * np.log(probabilities), axis=1), axis=0))
+        log_loss = (-1 / self.probabilities.shape[0])*(np.sum(np.sum(yohe * np.log(probabilities), axis=1), axis=0))
 
         if self.regularization:
             pass
@@ -266,6 +266,12 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
     """
 
     def _get_gradient(self, X, y, probas):
+        # One hot encoding of y
+        yohe = self._one_hot(y)
+        # Computes costs function gradient
+        gradient = np.transpose(X) * (probas - yohe) / X.shape[0]
 
-        pass
+        if self.regularization:
+            pass
 
+        return gradient
