@@ -82,7 +82,7 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
             logits = X_bias * self.theta
             self.probabilities = self._softmax(logits)
 
-            # loss =
+            loss = self._cost_function(self.probabilities, y)
             # self.theta_ =
 
             # self.losses_.append(loss)
@@ -179,7 +179,24 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
     """
 
     def _cost_function(self, probabilities, y):
-        pass
+        # One hot encoding of y
+        yohe = self._one_hot(y)
+        # Replaces 0 probabilities by eps
+        np.place(probabilities, probabilities == 0, self.eps)
+        # Replaces 1 probabilities by 1 - eps
+        np.place(probabilities, probabilities == 1, 1 - self.eps)
+
+        log_loss = (-1 / self.probabilities.shape[0])*(np.sum(np.sum(y * np.log(probabilities), axis=1), axis=0))
+
+        if self.regularization:
+            pass
+
+        # # Replaces 0 probabilities by eps
+        # np.place(probabilities, probabilities == 0, self.eps)
+        # # Replaces 1 probabilities by 1 - eps
+        # np.place(probabilities, probabilities == 1, 1 - self.eps)
+        #
+
 
     """
         In :
