@@ -80,7 +80,7 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         for epoch in range(self.n_epochs):
 
             logits = X_bias * self.theta
-            probabilities = self._softmax(logits)
+            self.probabilities = self._softmax(logits)
 
             # loss =
             # self.theta_ =
@@ -112,7 +112,7 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
             raise RuntimeError("You must train classifer before predicting data!")
         self.fit(X, y)
 
-
+        return self.probabilities
 
         """
         In: 
@@ -134,6 +134,8 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         except AttributeError:
             raise RuntimeError("You must train classifer before predicting data!")
         self.fit(X, y)
+
+        return self.probabilities * y
 
     def fit_predict(self, X, y=None):
         self.fit(X, y)
