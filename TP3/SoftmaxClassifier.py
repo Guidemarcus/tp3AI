@@ -157,7 +157,11 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
     """
 
     def score(self, X, y=None):
-        pass
+        self.regularization = False
+        probabilities = self.predict_proba(X, y)
+        log_loss = self._cost_function(probabilities, y)
+
+        return log_loss
 
     """
         Private methods, their names begin with an underscore
