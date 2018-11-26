@@ -224,8 +224,11 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         Probabilities
     """
 
-    def _softmax(self, z):
-        pass
+    def _softmax(z):
+        proba = np.apply_along_axis(lambda x: np.exp(x) / (sum(np.exp(z))), 0, z)
+        return proba
+
+
 
     """
         In:
