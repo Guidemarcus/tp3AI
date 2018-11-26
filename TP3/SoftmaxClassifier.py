@@ -68,16 +68,14 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         self.nb_feature = X.shape[1]
         self.nb_classes = len(np.unique(y))
 
-        # X_bias =
-        X_bias = X[:]
-        for i in range(len(X)):
-            X_bias[i].append(1)
-        # self.theta_  =
-        self.theta_ = []
-        for i in range(self.nb_feature + 1):
-            self.theta_.append([])
-            for j in range(self.nb_classes):
-                self.theta_[i].append(random.uniform(0, 1))
+        # Creates a Numpy array
+        np_x = np.array(X)
+        # Creates array with one more column than X
+        X_bias = np.ones((np_x.shape[0], self.nb_feature + 1))
+        # Sets the values so the first colums has ones and the others correspond to X
+        X_bias[:, 1:] = np_x
+
+        self.theta_ = np.random.rand(self.nb_feature + 1, self.nb_classes)
 
         for epoch in range(self.n_epochs):
 
