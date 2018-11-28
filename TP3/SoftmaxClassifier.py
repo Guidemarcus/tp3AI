@@ -1,6 +1,5 @@
 from sklearn.base import BaseEstimator, ClassifierMixin
 import numpy as np
-import random
 
 
 class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
@@ -61,20 +60,11 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
     """
 
     def fit(self, X, y=None):
-
         prev_loss = np.inf
         self.losses_ = []
 
-        self.nb_feature = X.shape[1]
         self.nb_classes = len(np.unique(y))
-
-        # Creates a Numpy array
-        np_x = np.array(X)
-        # Creates array with one more column than X
-        X_bias = np.ones((np_x.shape[0], self.nb_feature + 1))
-        # Sets the values so the first colums has ones and the others correspond to X
-        X_bias[:, 1:] = np_x
-
+        X_bias = self.add_bias(X)
         self.theta = np.random.rand(self.nb_feature + 1, self.nb_classes)
 
         for epoch in range(self.n_epochs):
@@ -83,16 +73,39 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
             self.probabilities = self._softmax(logits)
 
             loss = self._cost_function(self.probabilities, y)
+            prev_loss = loss
             # Updates weights
             self.theta_ = self.theta - self.lr * self._get_gradient(X_bias, y, self.probabilities)
 
             self.losses_.append(loss)
 
             if self.early_stopping:
-                if len(self.losses_) > 1 and self.threshold < abs(loss - self.losses_[-2]):
+                if self.threshold < abs(loss - prev_loss):
                     return self
 
         return self
+
+    """
+        In: 
+        X without bias
+
+        Do:
+        Add bias term to X
+
+        Out:
+        X with bias
+    """
+    def add_bias(self, X):
+        self.nb_feature = X.shape[1]
+
+        # Creates a Numpy array
+        np_x = np.array(X)
+        # Creates array with one more column than X
+        X_bias = np.ones((np_x.shape[0], self.nb_feature + 1))
+        # Sets the values so the first colums has ones and the others correspond to X
+        X_bias[:, 1:] = np_x
+
+        return X_bias
 
     """
         In: 
@@ -112,7 +125,10 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
             getattr(self, "theta_")
         except AttributeError:
             raise RuntimeError("You must train classifer before predicting data!")
-        self.fit(X, y)
+
+        X_bias = self.add_bias(X)
+        logits = np.dot(X_bias, self.theta)
+        self.probabilities = self._softmax(logits)
 
         return self.probabilities
 
@@ -135,8 +151,12 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
             getattr(self, "theta_")
         except AttributeError:
             raise RuntimeError("You must train classifer before predicting data!")
-        self.fit(X, y)
-        return np.dot(y, self.probabilities)
+
+        X_bias = self.add_bias(X)
+        logits = np.dot(X_bias, self.theta)
+        self.probabilities = self._softmax(logits)
+
+        return np.argmax(self.probabilities, axis=1)
 
     def fit_predict(self, X, y=None):
         self.fit(X, y)
@@ -179,8 +199,8 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         If self.regularization, compute l2 regularization term
         Ensure that probabilities are not equal to either 0. or 1. using self.eps
 
-        Out:
-        log_loss
+        Out: 
+        cost (real number)
     """
 
     def _cost_function(self, probabilities, y):
@@ -191,11 +211,12 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         # Replaces 1 probabilities by 1 - eps
         np.place(probabilities, probabilities == 1, 1 - self.eps)
 
-        log_loss = (-1 / self.probabilities.shape[0])*(np.sum(np.sum(yohe * np.log(probabilities), axis=1), axis=0))
+        log_loss = (-1 / probabilities.shape[0])*(np.sum(np.sum(yohe * np.log(probabilities), axis=1), axis=0))
 
         if self.regularization:
             theta2 = np.delete(self.theta, 0, 0)
-            log_loss = log_loss + self.alpha * np.sum(np.sum(np.power(theta2, 2), axis=1), axis=0)
+
+            log_loss = log_loss + self.alpha * np.sum(np.sum(np.power(theta2, 2), axis=1), axis=0) / probabilities.shape[0]
 
         # Replaces 0 probabilities by eps
         np.place(probabilities, probabilities == 0, self.eps)
@@ -243,8 +264,8 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         return yohe
 
     """
-        In :
-        Logits: (self.nb_features +1) * self.nb_classes
+        In: 
+        nb_examples * self.nb_classes
 
         Do:
         Compute softmax on logits
@@ -282,7 +303,6 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
 
         if self.regularization:
             theta2 = np.delete(self.theta, 0, 0)
-            # TODO Vérifier s'il faut ajouter le terme au gradient ou non
-            gradient = gradient + self.alpha * np.sum(np.sum(np.power(theta2, 2), axis=1), axis=0)
+            gradient = gradient + self.alpha * np.sum(np.sum(np.power(theta2, 2), axis=1), axis=0) / probas.shape[0] * self.theta
 
         return gradient
