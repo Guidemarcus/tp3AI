@@ -68,7 +68,6 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         self.theta = np.random.rand(self.nb_feature + 1, self.nb_classes)
 
         for epoch in range(self.n_epochs):
-
             logits = np.dot(X_bias, self.theta)
             self.probabilities = self._softmax(logits)
 
@@ -211,12 +210,19 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         # Replaces 1 probabilities by 1 - eps
         np.place(probabilities, probabilities == 1, 1 - self.eps)
 
-        log_loss = (-1 / probabilities.shape[0])*(np.sum(np.sum(yohe * np.log(probabilities), axis=1), axis=0))
+        log_loss = 0
+        m = probabilities.shape[0]
+
+        for i in range(m):
+            for k in range(self.nb_classes):
+                log_loss = log_loss + yohe[i][k] * np.log(probabilities[i][k])
+
+        log_loss = log_loss * (-1 / m)
+        # log_loss = (-1 / probabilities.shape[0]) * (np.sum(np.sum(yohe * np.log(probabilities), axis=1), axis=0))
 
         if self.regularization:
             theta2 = np.delete(self.theta, 0, 0)
-
-            log_loss = log_loss + self.alpha * np.sum(np.sum(np.power(theta2, 2), axis=1), axis=0) / probabilities.shape[0]
+            log_loss = log_loss + self.alpha * np.sum(np.sum(np.power(theta2, 2), axis=1), axis=0) / m
 
         # Replaces 0 probabilities by eps
         np.place(probabilities, probabilities == 0, self.eps)
@@ -275,7 +281,9 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
     """
 
     def _softmax(self, z):
-        return np.apply_along_axis(lambda x: np.exp(x) / (np.sum(np.exp(z), axis=1)), 0, z)
+        logit_exp_sum = np.sum(np.exp(z), axis=1)
+
+        return np.apply_along_axis(lambda zk: np.exp(zk) / logit_exp_sum, 0, z)
 
 
 
@@ -296,13 +304,14 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
     """
 
     def _get_gradient(self, X, y, probas):
+        m = X.shape[0]
         # One hot encoding of y
         yohe = self._one_hot(y)
         # Computes costs function gradient
-        gradient = np.dot(np.transpose(X), (probas - yohe)) / X.shape[0]
+        gradient = np.dot(np.transpose(X), (probas - yohe)) / m
 
         if self.regularization:
             theta2 = np.delete(self.theta, 0, 0)
-            gradient = gradient + self.alpha * np.sum(np.sum(np.power(theta2, 2), axis=1), axis=0) / probas.shape[0] * self.theta
+            gradient = gradient + self.alpha * np.sum(np.sum(np.power(theta2, 2), axis=1), axis=0) * self.theta / m
 
         return gradient
