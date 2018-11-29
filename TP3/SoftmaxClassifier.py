@@ -207,13 +207,6 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         # Replaces 1 probabilities by 1 - eps
         np.place(probabilities, probabilities == 1, 1 - self.eps)
 
-        # log_loss = 0
-        #
-        # for i in range(m):
-        #     for k in range(self.nb_classes):
-        #         log_loss = log_loss + yohe[i][k] * np.log(probabilities[i][k])
-        #
-        # log_loss = log_loss * (-1 / m)
         log_loss = (-1 / probabilities.shape[0]) * (np.sum(np.sum(yohe * np.log(probabilities), axis=1), axis=0))
 
         if self.regularization:
@@ -259,8 +252,6 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
             np.place(np_y, np_y == categories[index], index)
 
         # Sets ones to the concerned values without using loop directly
-        # print(np.arange(m))
-        # print(np_y)
         yohe[np.arange(m), np_y] = 1
 
         return yohe
