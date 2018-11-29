@@ -65,15 +65,15 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
 
         self.nb_classes = len(np.unique(y))
         X_bias = self.add_bias(X)
-        self.theta = np.random.rand(self.nb_feature + 1, self.nb_classes)
+        self.theta = np.random.rand(X.shape[1] + 1, self.nb_classes)
 
         for epoch in range(self.n_epochs):
             logits = np.dot(X_bias, self.theta)
-            self.probabilities = self._softmax(logits)
+            probabilities = self._softmax(logits)
 
-            loss = self._cost_function(self.probabilities, y)
+            loss = self._cost_function(probabilities, y)
             # Updates weights
-            self.theta_ = self.theta - self.lr * self._get_gradient(X_bias, y, self.probabilities)
+            self.theta_ = self.theta - self.lr * self._get_gradient(X_bias, y, probabilities)
 
             self.losses_.append(loss)
 
@@ -95,13 +95,11 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         X with bias
     """
     def add_bias(self, X):
-        self.nb_feature = X.shape[1]
-
         # Creates a Numpy array
         np_x = np.array(X)
         # Creates array with one more column than X
-        X_bias = np.ones((np_x.shape[0], self.nb_feature + 1))
-        # Sets the values so the first colums has ones and the others correspond to X
+        X_bias = np.ones((np_x.shape[0], X.shape[1] + 1))
+        # Sets the values so the first column has ones and the others correspond to X
         X_bias[:, 1:] = np_x
 
         return X_bias
@@ -127,9 +125,8 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
 
         X_bias = self.add_bias(X)
         logits = np.dot(X_bias, self.theta)
-        self.probabilities = self._softmax(logits)
 
-        return self.probabilities
+        return self._softmax(logits)
 
         """
         In: 
@@ -153,9 +150,8 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
 
         X_bias = self.add_bias(X)
         logits = np.dot(X_bias, self.theta)
-        self.probabilities = self._softmax(logits)
 
-        return np.argmax(self.probabilities, axis=1)
+        return np.argmax(self._softmax(logits), axis=1)
 
     def fit_predict(self, X, y=None):
         self.fit(X, y)
@@ -203,6 +199,7 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
     """
 
     def _cost_function(self, probabilities, y):
+        m = probabilities.shape[0]
         # One hot encoding of y
         yohe = self._one_hot(y)
         # Replaces 0 probabilities by eps
@@ -210,15 +207,14 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         # Replaces 1 probabilities by 1 - eps
         np.place(probabilities, probabilities == 1, 1 - self.eps)
 
-        log_loss = 0
-        m = probabilities.shape[0]
-
-        for i in range(m):
-            for k in range(self.nb_classes):
-                log_loss = log_loss + yohe[i][k] * np.log(probabilities[i][k])
-
-        log_loss = log_loss * (-1 / m)
-        # log_loss = (-1 / probabilities.shape[0]) * (np.sum(np.sum(yohe * np.log(probabilities), axis=1), axis=0))
+        # log_loss = 0
+        #
+        # for i in range(m):
+        #     for k in range(self.nb_classes):
+        #         log_loss = log_loss + yohe[i][k] * np.log(probabilities[i][k])
+        #
+        # log_loss = log_loss * (-1 / m)
+        log_loss = (-1 / probabilities.shape[0]) * (np.sum(np.sum(yohe * np.log(probabilities), axis=1), axis=0))
 
         if self.regularization:
             theta2 = np.delete(self.theta, 0, 0)
@@ -303,12 +299,12 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
 
     """
 
-    def _get_gradient(self, X, y, probas):
+    def _get_gradient(self, X, y, probabilities):
         m = X.shape[0]
         # One hot encoding of y
         yohe = self._one_hot(y)
         # Computes costs function gradient
-        gradient = np.dot(np.transpose(X), (probas - yohe)) / m
+        gradient = np.dot(np.transpose(X), (probabilities - yohe)) / m
 
         if self.regularization:
             theta2 = np.delete(self.theta, 0, 0)
