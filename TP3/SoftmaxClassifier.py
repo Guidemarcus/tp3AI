@@ -72,7 +72,6 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
             self.probabilities = self._softmax(logits)
 
             loss = self._cost_function(self.probabilities, y)
-            prev_loss = loss
             # Updates weights
             self.theta_ = self.theta - self.lr * self._get_gradient(X_bias, y, self.probabilities)
 
@@ -80,6 +79,8 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
 
             if self.early_stopping and self.threshold > abs(loss - prev_loss):
                 return self
+
+            prev_loss = loss
 
         return self
 
