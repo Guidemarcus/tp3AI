@@ -65,7 +65,7 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
 
         self.nb_classes = len(np.unique(y))
         X_bias = self.add_bias(X)
-        self.theta = np.random.rand(X.shape[1] + 1, self.nb_classes)
+        self.theta = np.random.normal(scale=0.3, size=(X.shape[1] + 1, self.nb_classes))
 
         for epoch in range(self.n_epochs):
             logits = np.dot(X_bias, self.theta)
@@ -150,8 +150,9 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
 
         X_bias = self.add_bias(X)
         logits = np.dot(X_bias, self.theta)
+        probabilities = self._softmax(logits)
 
-        return np.argmax(self._softmax(logits), axis=1)
+        return np.argmax(probabilities, axis=1)
 
     def fit_predict(self, X, y=None):
         self.fit(X, y)
@@ -268,9 +269,12 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
     """
 
     def _softmax(self, z):
-        logit_exp_sum = np.sum(np.exp(z), axis=1)
-
-        return np.apply_along_axis(lambda zk: np.exp(zk) / logit_exp_sum, 0, z)
+        z = z - np.max(z, axis=1, keepdims=True)
+        return np.exp(z) / np.sum(np.exp(z), axis=0)
+        
+        # logit_exp_sum = np.sum(np.exp(z), axis=1)
+        #
+        # return np.apply_along_axis(lambda zk: np.exp(zk) / logit_exp_sum, 0, z)
 
 
 
@@ -295,7 +299,7 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         # One hot encoding of y
         yohe = self._one_hot(y)
         # Computes costs function gradient
-        gradient = np.dot(np.transpose(X), (probabilities - yohe)) / m
+        gradient = self.lr * (np.dot(np.transpose(X), (probabilities - yohe)) / float(m))
 
         if self.regularization:
             theta2 = np.delete(self.theta, 0, 0)
