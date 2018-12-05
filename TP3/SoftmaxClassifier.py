@@ -271,7 +271,7 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
     def _softmax(self, z):
         z = z - np.max(z, axis=1, keepdims=True)
         return np.exp(z) / np.sum(np.exp(z), axis=0)
-        
+
         # logit_exp_sum = np.sum(np.exp(z), axis=1)
         #
         # return np.apply_along_axis(lambda zk: np.exp(zk) / logit_exp_sum, 0, z)
