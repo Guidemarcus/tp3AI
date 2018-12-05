@@ -5,8 +5,8 @@ import numpy as np
 class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
     """A softmax classifier"""
 
-    def __init__(self, lr=0.1, alpha=100, n_epochs=1000, eps=1.0e-5, threshold=1.0e-10, regularization=True,
-                 early_stopping=True):
+    def __init__(self, lr=0.1, alpha=100, n_epochs=1000, eps=1.0e-5, threshold=1.0e-10, regularization=False,
+                 early_stopping=False):
 
         """
             self.lr : the learning rate for weights update during gradient descent
@@ -65,22 +65,21 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
 
         self.nb_classes = len(np.unique(y))
         X_bias = self.add_bias(X)
-        self.theta = np.random.normal(scale=0.3, size=(X.shape[1] + 1, self.nb_classes))
+        self.theta_ = np.random.normal(scale=0.3, size=(X.shape[1] + 1, self.nb_classes))
 
         for epoch in range(self.n_epochs):
-            logits = np.dot(X_bias, self.theta)
+            logits = np.dot(X_bias, self.theta_)
             probabilities = self._softmax(logits)
 
             loss = self._cost_function(probabilities, y)
+            prev_loss = loss
             # Updates weights
-            self.theta_ = self.theta - self.lr * self._get_gradient(X_bias, y, probabilities)
+            self.theta_ = self.theta_ - self._get_gradient(X_bias, y, probabilities)
 
             self.losses_.append(loss)
 
             if self.early_stopping and self.threshold > abs(loss - prev_loss):
                 return self
-
-            prev_loss = loss
 
         return self
 
@@ -124,11 +123,12 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
             raise RuntimeError("You must train classifer before predicting data!")
 
         X_bias = self.add_bias(X)
-        logits = np.dot(X_bias, self.theta)
+        logits = np.dot(X_bias, self.theta_)
+        probabilities = self._softmax(logits)
 
-        return self._softmax(logits)
+        return probabilities
 
-        """
+    """
         In: 
         X without bias
 
@@ -149,7 +149,7 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
             raise RuntimeError("You must train classifer before predicting data!")
 
         X_bias = self.add_bias(X)
-        logits = np.dot(X_bias, self.theta)
+        logits = np.dot(X_bias, self.theta_)
         probabilities = self._softmax(logits)
 
         return np.argmax(probabilities, axis=1)
@@ -172,9 +172,9 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
 
     """
 
-    def score(self, X, y=None):
+    def score(self, X, y, **kwargs):
         self.regularization = False
-        probabilities = self.predict_proba(X, y)
+        probabilities = self.predict_proba(X)
         log_loss = self._cost_function(probabilities, y)
 
         return log_loss
@@ -208,10 +208,10 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         # Replaces 1 probabilities by 1 - eps
         np.place(probabilities, probabilities == 1, 1 - self.eps)
 
-        log_loss = (-1 / probabilities.shape[0]) * (np.sum(np.sum(yohe * np.log(probabilities), axis=1), axis=0))
+        log_loss = (-1 / m) * (np.sum(np.sum(yohe * np.log(probabilities), axis=1), axis=0))
 
         if self.regularization:
-            theta2 = np.delete(self.theta, 0, 0)
+            theta2 = np.delete(self.theta_, 0, 0)
             log_loss = log_loss + self.alpha * np.sum(np.sum(np.power(theta2, 2), axis=1), axis=0) / m
 
         # Replaces 0 probabilities by eps
@@ -269,13 +269,8 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
     """
 
     def _softmax(self, z):
-        z = z - np.max(z, axis=1, keepdims=True)
-        return np.exp(z) / np.sum(np.exp(z), axis=0)
-
-        # logit_exp_sum = np.sum(np.exp(z), axis=1)
-        #
-        # return np.apply_along_axis(lambda zk: np.exp(zk) / logit_exp_sum, 0, z)
-
+        somme = np.sum(np.exp(z), axis=1)
+        return np.apply_along_axis(lambda x: np.exp(x) / somme, 0, z)
 
 
     """
@@ -302,7 +297,7 @@ class SoftmaxClassifier(BaseEstimator, ClassifierMixin):
         gradient = self.lr * (np.dot(np.transpose(X), (probabilities - yohe)) / float(m))
 
         if self.regularization:
-            theta2 = np.delete(self.theta, 0, 0)
-            gradient = gradient + self.alpha * np.sum(np.sum(np.power(theta2, 2), axis=1), axis=0) * self.theta / m
+            theta2 = np.delete(self.theta_, 0, 0)
+            gradient = gradient + self.alpha * np.sum(np.sum(np.power(theta2, 2), axis=1), axis=0) * self.theta_ / m
 
         return gradient
